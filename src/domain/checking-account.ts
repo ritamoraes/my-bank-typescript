@@ -1,33 +1,24 @@
-import { Account, EntryType } from './interfaces/account';
+import "reflect-metadata"
+import { EntryType } from './interfaces/account';
 import { TransactionSummary } from './interfaces/transaction-summary';
+import {CheckingAccountService} from "../checking-account-service";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class CheckingAccount {
-  private accounts: Account[] = [
-    {
-      id: 'A',
-      balance: 100,
-      entries: []
-    },
-    {
-      id: 'B',
-      balance: 100,
-      entries: []
-    }
-  ];
+  private service: CheckingAccountService;
 
-  constructor() {}
+  constructor(@inject(CheckingAccountService) service: CheckingAccountService) {
+    this.service = service;
+  }
 
   transaction(
     originAccountId: string,
     destinationAccountId: string,
     value: number
   ): void {
-    const originAccount = this.accounts.find(
-      (account) => account.id === originAccountId
-    );
-    const destinationAccount = this.accounts.find(
-      (account) => account.id == destinationAccountId
-    );
+    const originAccount = this.service.getAccountById(originAccountId);
+    const destinationAccount = this.service.getAccountById(destinationAccountId);
 
     originAccount.entries.push({ value: value, type: EntryType.DEBIT });
     originAccount.balance -= value;
@@ -37,7 +28,7 @@ export class CheckingAccount {
   }
 
   transactionSummary(accountId: string): TransactionSummary {
-    const account = this.accounts.find((account) => account.id === accountId);
+    const account = this.service.getAccountById(accountId);
 
     const creditList = account.entries.filter(
       (entry) => entry.type === EntryType.CREDIT
