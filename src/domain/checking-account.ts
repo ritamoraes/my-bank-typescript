@@ -1,25 +1,27 @@
-export class CheckingAccount {
-  private accounts: any[];
+import { Account, EntryType } from './interfaces/account';
+import { TransactionSummary } from './interfaces/transaction-summary';
 
-  constructor() {
-    this.accounts = [];
-    this.accounts.push({
-      id: "A",
+export class CheckingAccount {
+  private accounts: Account[] = [
+    {
+      id: 'A',
       balance: 100,
-      entries: [],
-    });
-    this.accounts.push({
-      id: "B",
+      entries: []
+    },
+    {
+      id: 'B',
       balance: 100,
-      entries: [],
-    });
-  }
+      entries: []
+    }
+  ];
+
+  constructor() {}
 
   transaction(
     originAccountId: string,
     destinationAccountId: string,
     value: number
-  ) {
+  ): void {
     const originAccount = this.accounts.find(
       (account) => account.id === originAccountId
     );
@@ -27,20 +29,22 @@ export class CheckingAccount {
       (account) => account.id == destinationAccountId
     );
 
-    originAccount.entries.push({ value: value, type: "DEBIT" });
+    originAccount.entries.push({ value: value, type: EntryType.DEBIT });
     originAccount.balance -= value;
 
-    destinationAccount.entries.push({ value: value, type: "CREDIT" });
+    destinationAccount.entries.push({ value: value, type: EntryType.CREDIT });
     destinationAccount.balance += value;
   }
 
-  getTransaction(accountId: string) {
+  transactionSummary(accountId: string): TransactionSummary {
     const account = this.accounts.find((account) => account.id === accountId);
 
     const creditList = account.entries.filter(
-      (entry) => entry.type === "CREDIT"
+      (entry) => entry.type === EntryType.CREDIT
     );
-    const debitList = account.entries.filter((entry) => entry.type === "DEBIT");
+    const debitList = account.entries.filter(
+      (entry) => entry.type === EntryType.DEBIT
+    );
 
     let totalCredit = 0;
     let totalDebit = 0;
@@ -56,7 +60,7 @@ export class CheckingAccount {
     return {
       accountId: accountId,
       totalCredit: totalCredit,
-      totalDebit: totalDebit,
+      totalDebit: totalDebit
     };
   }
 }
